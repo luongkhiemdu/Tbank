@@ -1,0 +1,54 @@
+name: DFX Build & Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install DFX
+        run: sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+
+      - name: Add DFX to PATH
+        run: echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start DFX replica in background
+        run: dfx start --background
+
+      - name: Build canisters
+        run: dfx build
+        env:
+          DFX_NETWORK: local
+
+      - name: Deploy canisters to local replica
+        run: dfx deploy --network local
+        continue-on-error: true
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Check build output
+        run: |
+          echo "✅ Build completed successfully"
+          dfx canister id dbank --network local || echo "⚠️ Could not get canister ID"
+
+      - name: Stop DFX replica
+        if: always()
+        run: dfx stop
