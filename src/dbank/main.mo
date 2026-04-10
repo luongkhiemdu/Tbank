@@ -2,13 +2,13 @@ import Debug "mo:base/Debug";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 
-actor DBank {
-  stable var currentValue: Float = 300;
-  // currentValue :=300;
-  stable var startTime = Time.now();
-  // startTime := Time.now();
-  Debug.print("Start time: " # debug_show(startTime));
-  let id = 1234567890;
+persistent actor DBank {
+ stable var currentValue: Float = 300;
+  currentValue :=300;
+  Debug.print(debug_show (currentValue));
+ stable var startTime = Time.now();
+  startTime := Time.now();
+  Debug.print(debug_show(startTime));
    
   // Debug.print(debug_show (currentValue));
 public func topUp (amount : Float) {
